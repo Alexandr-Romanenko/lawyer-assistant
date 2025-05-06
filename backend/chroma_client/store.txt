@@ -1,0 +1,138 @@
+
+class AnalyzerViewSet(APIView):
+
+    def post(self, request):
+        input_text = request.data.get('input_text')
+
+        if not input_text:
+           return Response({"error": "You need to pass a URLs."}, status=status.HTTP_400_BAD_REQUEST)
+
+        processing = DecisionProcessor(input_text)
+        processing.run()
+
+        result = processing.generate_urls()
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class DecisionProcessor:
+    def __init__(self, input_text: str, question: str):
+        self.raw_data = input_text
+        self.question = question
+        self.decision_ids = []
+        self.urls = []
+
+    def extract_ids(self) -> list[str]:
+        """
+        Извлекает номера решений из текста.
+        """
+        self.decision_ids = re.findall(r'^\d{7,8}', self.raw_data, re.MULTILINE)
+        return self.decision_ids
+
+    def generate_urls(self):
+        """
+        Генерирует список URL на основе извлечённых ID и запускает группу задач.
+        """
+
+        tasks = []
+        for decision_id in self.decision_ids:
+            url = f"https://reyestr.court.gov.ua/Review/{decision_id}"
+            self.urls.append(url)
+            tasks.append(decision_processing_task.s(url, decision_id))  # Обрати внимание на .s вместо .delay
+
+        # Запуск chord (группа + callback)
+        chord(tasks)(final_search_task.s())
+
+        return {"submitted_ids": self.decision_ids, "message": "Tasks have been queued"}
+
+
+    def run(self):
+        self.extract_ids()
+        self.generate_urls()
+
+
+@shared_task(bind=True, max_retries=2, queue="decision_processing")
+def decision_processing_task(self, url: str, decision_id: str):
+    try:
+        decision, _ = CourtDecision.objects.get_or_create(decision_id=int(decision_id))
+        if decision.status == DecisionStatus.DONE:
+            return {"status": "already_done", "decision_id": decision_id}
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        cleaned_text = extract_text_from_url(url)
+        decision_metadata = extract_metadata(cleaned_text)
+        chroma_handler = ChromaDBHandler()
+        documents = chroma_handler.split_text(cleaned_text)
+
+        for doc in documents:
+            doc.metadata.update({
+                "decision_id": decision_id,
+                "number": decision_metadata.number,
+            })
+
+        chroma_handler.save_documents(documents)
+        decision.decision_number = decision_metadata.number
+        decision.proceeding_number = decision_metadata.proceeding
+        decision.status = DecisionStatus.DONE
+        decision.save(update_fields=["decision_number", "proceeding_number", "status"])
+
+        chroma_handler.close()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        # Явно удаляем тяжелые объекты
+        del cleaned_text
+        del decision_metadata
+        del documents
+        del chroma_handler
+
+        # Принудительно запускаем сборщик мусора
+        gc.collect()
+
+        return {"status": "success", "decision_id": decision_id}
+
+    except Exception as e:
+        logger.error(f"Ошибка обработки решения {decision_id}: {str(e)}")
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        return {"status": "error", "decision_id": decision_id, "error_message": str(e)}
+
+
+@shared_task
+def final_search_task(results):
+    """
+    Финальная задача, которая вызывается после выполнения всех задач группы.
+    """
+    errors = []
+    successes = []
+
+    for result in results:
+        if result.get("status") == "error":
+            errors.append(result)
+        else:
+            successes.append(result)
+
+    if errors:
+        logger.warning(f"В ходе обработки возникли ошибки в {len(errors)} задачах")
+        for error in errors:
+            logger.error(f"Ошибка в решении {error.get('decision_id')}: {error.get('error_message')}")
+
+    # Выполняем поиск только по успешно обработанным решениям
+    chroma_handler = ChromaDBHandler()
+
+    # Например, поиск по всем успешным decision_id
+    query_ids = [success["decision_id"] for success in successes]
+    found_documents = chroma_handler.search_documents_by_ids(query_ids)
+
+    chroma_handler.close()
+
+    return {
+        "message": "Финальный поиск завершен",
+        "found_documents_count": len(found_documents),
+        "errors_count": len(errors),
+        "successful_ids": query_ids,
+    }
+
+

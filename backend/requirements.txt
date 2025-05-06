@@ -9,3 +9,5 @@ chromadb
 sentence-transformers
 langchain-chroma
 djangorestframework-simplejwt
+redis
+langchain-huggingface>=0.0.1

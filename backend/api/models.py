@@ -2,15 +2,14 @@ from django.db import models
 
 
 class DecisionStatus(models.TextChoices):
-    ABSENT = 'absent', 'Відсутнє'
-    DONE = 'done', 'Оброблено'
+    ABSENT = 'absent', 'Absent'
+    DONE = 'done', 'Done'
 
 
 class CourtDecision(models.Model):
-    decision_id = models.BigIntegerField(unique=True)
+    decision_id = models.CharField(max_length=150, unique=True)
     decision_number = models.CharField(max_length=150)
     proceeding_number = models.CharField(max_length=150)
-    decision_date = models.DateField(blank=True, null=True)
     status = models.CharField(
         max_length=10,
         choices=DecisionStatus.choices,

@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
-    'auth',
+    'user',
     'rest_framework',
     'corsheaders',
 ]
@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
     )
 }
 
-AUTH_USER_MODEL = 'auth.User'
+AUTH_USER_MODEL = 'user.User'
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 

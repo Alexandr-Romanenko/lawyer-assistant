@@ -3,8 +3,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from auth.serializers import LoginSerializer, RegisterSerializer
-from auth.models import User
+from user.serializers import LoginSerializer, RegisterSerializer
+from user.models import User
 
 
 class LoginViewset(viewsets.ViewSet):

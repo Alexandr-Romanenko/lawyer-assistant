@@ -1,5 +1,5 @@
 from rest_framework import serializers 
-from auth.models import User 
+from user.models import User
 
 
 class LoginSerializer(serializers.Serializer):
