@@ -181,7 +181,7 @@ const HomePage = () => {
         <p><strong>Текст:</strong> {item.text}</p>
         <p><strong>Коефіцієнт схожості:</strong> {item.similarity_score.toFixed(3)}</p>
         {item.metadata && (
-          <p><strong>Decision ID:</strong> {item.metadata.decision_id}</p>
+          <p><strong>Decision ID:</strong> {item.metadata.decision_number}</p>
         )}
       </div>
     ))}
