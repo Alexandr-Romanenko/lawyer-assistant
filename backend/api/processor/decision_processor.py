@@ -10,7 +10,7 @@ class DecisionProcessor:
         self.urls = []
 
     def extract_ids(self) -> list[str]:
-        self.decision_ids = re.findall(r'^\d{7,8}', self.raw_data, re.MULTILINE)
+        self.decision_ids = re.findall(r'^\d{7,9}', self.raw_data, re.MULTILINE)
         return self.decision_ids
 
     def process_all(self) -> dict:

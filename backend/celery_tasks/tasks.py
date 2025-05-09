@@ -24,7 +24,7 @@ def decision_processing_task(self, url: str, decision_id: str):  # ***** Del sel
         chroma_handler = ChromaDBHandler()
         documents = split_text_into_chunks(cleaned_text, decision_id, decision_metadata)
 
-        ids = [f"doc_{i}" for i in range(len(documents))]
+        ids = [f"{decision_id}_chunk_{i}" for i in range(len(documents))]
         chroma_handler.save_documents(documents, ids, decision_id)
 
         decision.decision_number = decision_metadata.number

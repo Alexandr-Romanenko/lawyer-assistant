@@ -1,0 +1,16 @@
+          {/* Результат */}
+{result && Array.isArray(result) && result.length > 0 && !loading && (
+  <div className="result-block" style={{ marginTop: "20px" }}>
+    <h3>Результат пошуку:</h3>
+    {result.map((item, index) => (
+      <div key={index} className="result-item" style={{ marginBottom: "15px", padding: "10px", border: "1px solid #ccc", borderRadius: "8px" }}>
+        <p><strong>Document №{index + 1}</strong></p>
+        <p><strong>Текст:</strong> {item.text}</p>
+        <p><strong>Коефіцієнт схожості:</strong> {item.similarity_score.toFixed(3)}</p>
+        {item.metadata && (
+          <p><strong>Decision ID:</strong> {item.metadata.decision_number}</p>
+        )}
+      </div>
+    ))}
+  </div>
+)}

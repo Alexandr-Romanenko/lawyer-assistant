@@ -176,13 +176,23 @@ const HomePage = () => {
   <div className="result-block" style={{ marginTop: "20px" }}>
     <h3>Результат пошуку:</h3>
     {result.map((item, index) => (
-      <div key={index} className="result-item" style={{ marginBottom: "15px", padding: "10px", border: "1px solid #ccc", borderRadius: "8px" }}>
-        <p><strong>Document №{index + 1}</strong></p>
-        <p><strong>Текст:</strong> {item.text}</p>
-        <p><strong>Коефіцієнт схожості:</strong> {item.similarity_score.toFixed(3)}</p>
-        {item.metadata && (
-          <p><strong>Decision ID:</strong> {item.metadata.decision_number}</p>
-        )}
+      <div key={index} className="result-item" style={{ marginBottom: "20px", padding: "15px", border: "1px solid #ccc", borderRadius: "8px" }}>
+        <p><strong>Рішення №{index + 1}</strong></p>
+        <p><strong>Decision ID:</strong> {item.decision_id}</p>
+        <p><strong>Макс. коефіцієнт схожості:</strong> {item.max_score.toFixed(3)}</p>
+
+        <div style={{ marginTop: "10px", paddingLeft: "10px" }}>
+          <p><strong>Схожі фрагменти:</strong></p>
+          {item.chunks.map((chunk, chunkIndex) => (
+            <div key={chunkIndex} style={{ marginBottom: "10px", padding: "10px", backgroundColor: "#f9f9f9", borderRadius: "6px" }}>
+              <p>{chunk.text}</p>
+              <p><em>Коефіцієнт: {chunk.similarity_score.toFixed(3)}</em></p>
+              {chunk.metadata?.decision_number && (
+                <p><em>Номер рішення: {chunk.metadata.decision_number}</em></p>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     ))}
   </div>
