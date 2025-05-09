@@ -53,18 +53,6 @@ def extract_metadata(text: str) -> DecisionMetadata:
     proceeding_number_match = re.search(r"(провадження)?\s*№\s*(\d+/\d+/\d+/\d+)", text, re.IGNORECASE)
     proceeding_number = proceeding_number_match.group(2) if proceeding_number_match else "unspecified"
 
-    # # Дата рішення: 26.02.2014 або 26 лютого 2014 року
-    # date_match = re.search(
-    #     r"(\d{2}\.\d{2}\.\d{4})|(\d{1,2}\s+[а-яґєії]+\s+20\d{2})", text, re.IGNORECASE
-    # )
-    # if date_match:
-    #     if date_match.group(1):
-    #         decision_date = date_match.group(1)
-    #     else:
-    #         decision_date = date_match.group(2)
-    # else:
-    #     decision_date = "unspecified"
-
     return DecisionMetadata(
         number=case_number,
         proceeding=proceeding_number,

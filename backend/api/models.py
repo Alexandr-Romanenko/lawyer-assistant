@@ -19,4 +19,3 @@ class CourtDecision(models.Model):
 
     def __str__(self):
         return f"{self.decision_id} - {self.get_status_display()}"
-
