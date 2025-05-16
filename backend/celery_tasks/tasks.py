@@ -13,13 +13,11 @@ logger = logging.getLogger("tasks")
 
 
 @shared_task(bind=True, max_retries=2, queue="decision_processing")
-def decision_processing_task(self, url: str, decision_id: str):
+def decision_processing_task(self, url: str, decision_id: str, user_id: int):
     import redis
     import json
 
     redis_client = redis.Redis(host="localhost", port=6379, db=0)
-
-    user = self.requester.user
 
     def notify(status: str, detail: str = ""):
         message = {
@@ -27,12 +25,12 @@ def decision_processing_task(self, url: str, decision_id: str):
             "status": status,
             "detail": detail,
         }
-        redis_client.publish(f"user:{user.id}", json.dumps(message))
+        redis_client.publish(f"user:{user_id}", json.dumps(message))
 
     try:
         decision, _ = CourtDecision.objects.get_or_create(decision_id=decision_id)
         if decision.status == DecisionStatus.DONE:
-            notify("already_done")
+            notify("already_done", f"The decision {decision_id} has already been processed.")
             return {"status": "already_done", "decision_id": decision_id}
 
         notify("started", "Processing started")

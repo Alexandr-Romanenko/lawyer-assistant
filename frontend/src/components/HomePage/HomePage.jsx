@@ -12,6 +12,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false); // состояние загрузки
   const [error, setError] = useState(null); // состояние ошибки
   const [progress, setProgress] = useState(null); // прогресс загрузки/анализа
+  const [messages, setMessages] = useState([]);
   const socketRef = useRef(null); // сохраняем сокет
 
   // web-socket
@@ -25,15 +26,15 @@ const HomePage = () => {
   };
 
   ws.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      console.log("WebSocket message:", data);
-      if (data.progress !== undefined) {
-        setProgress(data.progress);
-      }
-    } catch (err) {
-      console.error("Failed to parse WebSocket message", err);
-    }
+  try {
+    const data = JSON.parse(event.data);
+    console.log("WebSocket message:", data);
+
+    // Добавим новое сообщение в список
+    setMessages((prev) => [...prev, data]);
+   } catch (err) {
+    console.error("Failed to parse WebSocket message", err);
+   }
   };
 
   ws.onerror = (err) => {
@@ -49,27 +50,33 @@ const HomePage = () => {
             }
   }, []);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setLoading(true);
-    setError(null);
-    setResult(""); // очищаем старый результат
-    console.log(input_text);
+ const handleSubmit = (event) => {
+  event.preventDefault();
+  setLoading(true);
+  setError(null);
+  setResult(""); // очищаем старый результат
+  console.log(input_text);
 
-    AxiosInstance.post(`api/decision_upload/`, {
-      input_text,
+  AxiosInstance.post(
+    `api/decision_upload/`,
+    { input_text }, // тело запроса
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
+      },
+    }
+  )
+    .then((res) => {
+      console.log("The analysis was successful:", res.data);
+      setResult(res.data.result);
     })
-      .then((res) => {
-        console.log("The analysis was successful:", res.data);
-        setResult(res.data.result);
-      })
-      .catch((err) => {
-        console.error("Errors as a result of analysing the decision:", err);
-        setError("Помилка під час аналізу. Спробуйте ще раз.");
-      })
-      .finally(() => {
-        setLoading(false); // отключаем индикатор загрузки
-      });
+    .catch((err) => {
+      console.error("Errors as a result of analysing the decision:", err);
+      setError("Помилка під час аналізу. Спробуйте ще раз.");
+    })
+    .finally(() => {
+      setLoading(false); // отключаем индикатор загрузки
+    });
   };
 
     const handleSearch = (event) => {
@@ -192,6 +199,13 @@ const HomePage = () => {
               </div>
             </form>
           </div>
+
+          {/* WebSocket messages */}
+          {progress && !loading && (
+           <div style={{ marginTop: "20px" }}>
+            <Alert severity="info">{progress}</Alert>
+           </div>
+           )}
 
           {/* Лоадер */}
           {loading && (

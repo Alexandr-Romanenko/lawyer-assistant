@@ -23,7 +23,9 @@ class DecisionUploadView(APIView):
         if not processor.decision_ids:
             return Response({"error": "No decision IDs found in input_text."}, status=status.HTTP_400_BAD_REQUEST)
 
-        set_tasks = processor.process_all()
+        user_id = self.request.user.id
+
+        set_tasks = processor.process_all(user_id)
         message = f"Successfully sent {len(set_tasks)} decision for processing"
         result = {"message": message}
 

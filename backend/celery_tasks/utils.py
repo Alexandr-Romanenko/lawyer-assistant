@@ -1,3 +1,4 @@
+import json
 import os
 import re
 
@@ -10,6 +11,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from typing import List
 from email.message import EmailMessage
 
+import user
 from config.app_config import AppConfig
 from user.models import User
 

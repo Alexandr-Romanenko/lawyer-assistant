@@ -1,16 +1,19 @@
 from datetime import timedelta
+
 from django.utils import timezone
-from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth.views import LogoutView
+from django.contrib.auth import authenticate
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
-from user.serializers import LoginSerializer, RegisterSerializer
-from user.models import EmailVerification, User
+
 from celery_tasks.tasks import send_email_verification_link
 
+from user.serializers import LoginSerializer, RegisterSerializer
+from user.models import EmailVerification, User
 
 
 class LoginViewset(viewsets.ViewSet):
@@ -101,5 +104,9 @@ class VerifyUserView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
 
-class LogoutUser(LogoutView):
-    next_page = reverse_lazy('login')
+class LogoutView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        token: Token = request.auth
+        token.delete()
+        return Response('You have successfully completed your session!')

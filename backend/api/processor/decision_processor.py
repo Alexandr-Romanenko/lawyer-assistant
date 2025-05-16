@@ -12,12 +12,12 @@ class DecisionProcessor:
         self.decision_ids = re.findall(r'^\d{7,9}', self.raw_data, re.MULTILINE)
         return self.decision_ids
 
-    def process_all(self) -> list[str]:
+    def process_all(self, user_id: int) -> list[str]:
         tasks = []
         for decision_id in self.decision_ids:
             url = f"https://reyestr.court.gov.ua/Review/{decision_id}"
             self.urls.append(url)
-            decision_processing_task.delay(url, decision_id)
+            decision_processing_task.delay(url, decision_id, user_id)
             tasks.append(decision_id)
 
         return tasks

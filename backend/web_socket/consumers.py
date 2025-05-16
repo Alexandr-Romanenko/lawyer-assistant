@@ -54,7 +54,7 @@ class ProgressConsumer(AsyncWebsocketConsumer):
             async for message in pubsub.listen():
                 if message["type"] == "message":
                     logger.info(f"Sending message to frontend: {message['data']}")
-                    await self.send(message["data"])
+                    await self.send(message["data"].decode())
         except Exception as e:
             logger.error(f"Error listening to Redis: {e}")
             await self.close()
