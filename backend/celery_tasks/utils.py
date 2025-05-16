@@ -1,19 +1,26 @@
+import os
 import re
+
 from bs4 import BeautifulSoup
 from langchain_community.document_loaders import RecursiveUrlLoader
 from dataclasses import dataclass
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from typing import List
+from email.message import EmailMessage
+
 from config.app_config import AppConfig
-from typing import Any, Dict, List, Optional
+from user.models import User
+
+from dotenv import load_dotenv
+load_dotenv()
 
 
 @dataclass
 class DecisionMetadata:
     number: str
     proceeding: str
-    #date: str
 
 
 def clean_text(text: str) -> str:
@@ -47,7 +54,6 @@ def extract_metadata(text: str) -> DecisionMetadata:
     case_numbers = re.findall(pattern, text, flags=re.IGNORECASE)
     # Выбираем первый номер (если важно только один)
     case_number = case_numbers[0] if case_numbers else "unspecified"
-
 
     # Номер провадження
     proceeding_number_match = re.search(r"(провадження)?\s*№\s*(\d+/\d+/\d+/\d+)", text, re.IGNORECASE)
@@ -87,3 +93,34 @@ def split_text_into_chunks(text: str, decision_id: str, decision_metadata: Decis
     #     for chunk in chunks:
     #         f.write(f"{chunk.page_content}\n{chunk.metadata}\n\n")
 
+def get_email_template_user_verification(user_id: int, verification_code: str):
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist as e:
+        raise ValueError(f"User with id={user_id} does not exist") from e
+
+    email = EmailMessage()
+    email['Subject'] = 'Verification link'
+    email['From'] = os.getenv('SMTP_USER')
+    email['To'] = user.email
+
+    email.set_content(
+        '<div>'
+        f'<h1 style="color: red;">Hello, {user.first_name} {user.second_name}, please use code </h1>'
+        f'http://{AppConfig.DOMAIN_NAME}/user/verify/{verification_code}'
+        '</div>',
+        subtype='html'
+    )
+    return email
+
+def get_smtp_config():
+    config = {
+        "host": os.getenv("SMTP_HOST"),
+        "port": int(os.getenv("SMTP_PORT", "465")),
+        "user": os.getenv("SMTP_USER"),
+        "password": os.getenv("SMTP_PASSWORD"),
+    }
+    if not all(config.values()):
+        raise ValueError("Incomplete SMTP configuration")
+    return config

@@ -1,4 +1,40 @@
-          {/* Результат */}
+  // web-socket
+  useEffect(() => {
+    const token = localStorage.getItem("access");
+    //const ws = new WebSocket(`wss://ws/progress/?token=${token}`);
+    //const ws = new WebSocket(`ws://${window.location.host}/ws/progress/?token=${token}`);
+    const ws = new WebSocket(`ws://localhost:8000/ws/progress/?token=${token}`); // для локального запуска
+    //const socket = new WebSocket(`wss://${window.location.host}/ws/progress/?token=${yourToken}`); // для https
+    socketRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("WebSocket message:", data);
+      if (data.progress !== undefined) {
+        setProgress(data.progress); // или обрабатывай как нужно
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket error:", err);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket closed");
+    };
+
+    return () => {
+      ws.close(); // <- обязательно закрывать при размонтировании компонента
+    };
+  }, []);
+
+
+
+{/* Результат */}
 {result && Array.isArray(result) && result.length > 0 && !loading && (
   <div className="result-block" style={{ marginTop: "20px" }}>
     <h3>Результат пошуку:</h3>

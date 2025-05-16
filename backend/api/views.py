@@ -1,17 +1,16 @@
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from api.processor.decision_processor import DecisionProcessor
 from chroma_client.chroma_storage import ChromaDBHandler
-import logging
-from asgiref.sync import async_to_sync
 from collections import defaultdict
 
-
+import logging
 logger = logging.getLogger(__name__)
 
 
 class DecisionUploadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         input_text = request.data.get("input_text")
@@ -24,13 +23,16 @@ class DecisionUploadView(APIView):
         if not processor.decision_ids:
             return Response({"error": "No decision IDs found in input_text."}, status=status.HTTP_400_BAD_REQUEST)
 
-        result = processor.process_all()
+        set_tasks = processor.process_all()
+        message = f"Successfully sent {len(set_tasks)} decision for processing"
+        result = {"message": message}
+
         return Response(result, status=status.HTTP_200_OK)
 
 
-from collections import defaultdict
-
 class SearchView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         search_words = request.data.get("search")
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import AxiosInstance from "../Axios/Axios.jsx";
 import Textarea from "@mui/joy/Textarea";
 import Box from "@mui/joy/Box";
@@ -9,8 +9,45 @@ const HomePage = () => {
   const [search, setSearch] = useState("");
   const [input_text, setInputText] = useState("");
   const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false); // <- состояние загрузки
-  const [error, setError] = useState(null); // <- состояние ошибки
+  const [loading, setLoading] = useState(false); // состояние загрузки
+  const [error, setError] = useState(null); // состояние ошибки
+  const [progress, setProgress] = useState(null); // прогресс загрузки/анализа
+  const socketRef = useRef(null); // сохраняем сокет
+
+  // web-socket
+  useEffect(() => {
+  const token = localStorage.getItem("access");
+  const ws = new WebSocket(`ws://localhost:8000/ws/progress/?token=${token}`);
+  socketRef.current = ws;
+
+  ws.onopen = () => {
+    console.log("WebSocket connected");
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      console.log("WebSocket message:", data);
+      if (data.progress !== undefined) {
+        setProgress(data.progress);
+      }
+    } catch (err) {
+      console.error("Failed to parse WebSocket message", err);
+    }
+  };
+
+  ws.onerror = (err) => {
+    console.error("WebSocket error:", err);
+  };
+
+  ws.onclose = () => {
+    console.log("WebSocket closed");
+  };
+
+  return () => {
+            if (ws.readyState === 1) {ws.close();}
+            }
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();

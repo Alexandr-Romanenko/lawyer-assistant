@@ -1,0 +1,31 @@
+
+h1 {
+  font-size: 42px;
+  line-height: 1.5;
+}
+
+.registration-form {
+    width: 600px;
+}
+
+.item-text-input {
+  max-height: 218px;
+  margin-bottom: 10px;
+}
+
+.item-url-input {
+  max-height: 28px;
+  margin-bottom: 10px;
+}
+
+.login-form {
+    width: 600px;
+}
+
+.itemBox.links {
+    margin-top: 30px;
+}
+
+.link-item {
+    padding: 5px;
+}

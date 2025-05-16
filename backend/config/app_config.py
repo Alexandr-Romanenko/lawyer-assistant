@@ -9,3 +9,4 @@ class AppConfig:
     COLLECTION_NAME: str = "chroma_docs"
     MAX_CHUNK_SIZE: int = 512
     CHUNK_OVERLAP: int = 50
+    DOMAIN_NAME: str = "127.0.0.1:8000"

@@ -1,0 +1,15 @@
+.login-page-container {
+    align-items: center;
+}
+
+.login-form {
+    width: 600px;
+}
+
+.itemBox.links {
+    margin-top: 30px;
+}
+
+.link-item {
+    padding: 5px;
+}

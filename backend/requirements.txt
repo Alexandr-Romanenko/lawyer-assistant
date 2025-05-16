@@ -11,3 +11,6 @@ langchain-chroma
 djangorestframework-simplejwt
 redis
 langchain-huggingface>=0.0.1
+channels
+channels_redis
+aioredis
