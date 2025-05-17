@@ -26,16 +26,11 @@ export default function Navbar(props) {
   const path = location.pathname
   const navigate = useNavigate()
 
-  const logoutUser = () =>{
-     AxiosInstance.post(`logout/`,{
-     })
-     .then( () => {
-        localStorage.removeItem("Token")
-        navigate('/')
-     }
-
-     )
-  }
+  const logoutUser = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    navigate('/');
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>

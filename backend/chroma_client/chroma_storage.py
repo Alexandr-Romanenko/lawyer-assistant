@@ -1,4 +1,6 @@
 import os
+from typing import List, Optional, Dict, Any, Tuple
+
 import torch
 import logging
 from langchain_chroma import Chroma
@@ -70,6 +72,94 @@ class ChromaDBHandler:
             return self.db.similarity_search(query=query, k=k)
         except Exception as e:
             logger.exception(f"Ошибка при поиске: {e}")
+            raise
+
+    def similarity_search_by_vector(
+            self,
+            query: str | List[float],
+            k: int = 10,
+            filter: Optional[Dict[str, str]] = None,
+            where_document: Optional[Dict[str, str]] = None,
+            **kwargs: Any
+    ) -> List[Tuple[Document, float]]:
+        if not self.db:
+            self.load_or_create_db()
+
+        logger.info("Поиск по вектору (или тексту с преобразованием)...")
+
+        # Получаем вектор из текста, если передана строка
+        if isinstance(query, str):
+            if not self.embedding_model:
+                self.init_embedding_model()
+            embedding = self.embedding_model.embed_query(query)
+        else:
+            embedding = query  # уже вектор
+
+        # доступ к коллекции
+        collection = self.db._collection
+
+        try:
+            result = collection.query(
+                query_embeddings=[embedding],
+                n_results=k,
+                where=filter,
+                where_document=where_document,
+                include=["documents", "metadatas", "distances"],
+                **kwargs
+            )
+
+            documents = result.get("documents", [[]])[0]
+            metadatas = result.get("metadatas", [[]])[0]
+            distances = result.get("distances", [[]])[0]
+
+            results = []
+            for doc, meta, dist in zip(documents, metadatas, distances):
+                score = 1 - dist if dist is not None else None  # косинусная мера
+                results.append((Document(page_content=doc, metadata=meta), score))
+
+            return results
+
+        except Exception as e:
+            logger.exception(f"Ошибка при поиске по вектору: {e}")
+            raise
+
+    def similarity_search_by_vector_with_relevance_scores(
+            self,
+            embedding: List[float],
+            k: int = 4,
+            filter: Optional[Dict[str, str]] = None,
+            where_document: Optional[Dict[str, str]] = None,
+            **kwargs: Any
+    ) -> List[Tuple[Document, float]]:
+        if not self.db:
+            self.load_or_create_db()
+
+        logger.info("Поиск по вектору с оценками релевантности...")
+
+        try:
+            result = self.db._collection.query(
+                query_embeddings=[embedding],
+                n_results=k,
+                where=filter,
+                where_document=where_document,
+                include=["documents", "metadatas", "distances"],
+                **kwargs
+            )
+
+            documents = result.get("documents", [[]])[0]
+            metadatas = result.get("metadatas", [[]])[0]
+            distances = result.get("distances", [[]])[0]
+
+            results: List[Tuple[Document, float]] = []
+            for doc, meta, dist in zip(documents, metadatas, distances):
+                if doc is not None:
+                    relevance_score = dist  # меньше — лучше
+                    results.append((Document(page_content=doc, metadata=meta), relevance_score))
+
+            return results
+
+        except Exception as e:
+            logger.exception(f"Ошибка при поиске с оценками релевантности: {e}")
             raise
 
     def close(self):

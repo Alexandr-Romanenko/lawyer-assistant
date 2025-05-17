@@ -45,9 +45,19 @@ class SearchView(APIView):
             db_handler = ChromaDBHandler()
             db_handler.init_embedding_model()
 
-            results = db_handler.similarity_search(
-                query=search_words, with_score=True, k=100
-            )
+            # 1 similarity_search
+            # results = db_handler.similarity_search(
+            #     query=search_words, with_score=True, k=100
+            # )
+
+            #2 similarity_search_by_vector
+            results = db_handler.similarity_search_by_vector(search_words)
+
+            # # 3 similarity_search_by_vector_with_relevance_scores
+            # # 3.1. Получаем эмбеддинг из текста
+            # embedding = db_handler.embedding_model.embed_query(search_words)
+            # # 3.2. Поиск по эмбеддингу
+            # results = db_handler.similarity_search_by_vector_with_relevance_scores(embedding, k=100)
 
             formatted_results = [
                 {

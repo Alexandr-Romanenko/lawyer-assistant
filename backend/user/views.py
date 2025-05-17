@@ -102,11 +102,3 @@ class VerifyUserView(APIView):
                 "status": "error",
                 "data": "Invalid verification code"
             }, status=status.HTTP_404_NOT_FOUND)
-
-
-class LogoutView(APIView):
-
-    def post(self, request, *args, **kwargs):
-        token: Token = request.auth
-        token.delete()
-        return Response('You have successfully completed your session!')
