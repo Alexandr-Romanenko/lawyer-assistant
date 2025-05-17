@@ -1,3 +1,25 @@
+стиль как терминал
+{/* WebSocket messages area */}
+<div style={{
+  marginTop: "20px",
+  maxHeight: "300px",
+  overflowY: "auto",
+  backgroundColor: "#000",
+  color: "#0f0",
+  fontFamily: "monospace",
+  padding: "10px",
+  borderRadius: "5px"
+}}>
+  {messages.slice(-15).map((msg, index) => (
+    <div key={index}>
+      [ID: {msg.decision_id}] {msg.status.toUpperCase()} → {msg.detail}
+    </div>
+  ))}
+</div>
+
+
+
+
   // web-socket
   useEffect(() => {
     const token = localStorage.getItem("access");

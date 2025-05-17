@@ -12,6 +12,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=254)
     second_name = models.CharField(max_length=254)
     email = models.EmailField(max_length=200, unique=True)
+    uuid_channel = models.UUIDField(default=uuid.uuid4, unique=True)
     is_verified = models.BooleanField(default=False)
     registered_at = models.DateTimeField(auto_now_add=True)
 

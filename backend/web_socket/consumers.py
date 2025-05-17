@@ -28,7 +28,7 @@ class ProgressConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        self.channel_name_redis = f"user:{self.user.id}"
+        self.channel_name_redis = f"user:{self.user.uuid_channel}"
 
         try:
             self.redis = redis.from_url(

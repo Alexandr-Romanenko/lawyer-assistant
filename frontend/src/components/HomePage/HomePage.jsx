@@ -11,7 +11,7 @@ const HomePage = () => {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false); // состояние загрузки
   const [error, setError] = useState(null); // состояние ошибки
-  const [progress, setProgress] = useState(null); // прогресс загрузки/анализа
+  //const [progress, setProgress] = useState(null); // прогресс загрузки/анализа
   const [messages, setMessages] = useState([]);
   const socketRef = useRef(null); // сохраняем сокет
 
@@ -86,9 +86,14 @@ const HomePage = () => {
     setResult(""); // очищаем старый результат
     console.log(search);
 
-    AxiosInstance.post(`api/search/`, {
-      search,
-    })
+    AxiosInstance.post(`api/search/`,
+      {search},
+        {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
+      },
+    }
+    )
       .then((res) => {
         console.log("The analysis was successful:", res.data);
         setResult(res.data.result);
@@ -200,12 +205,26 @@ const HomePage = () => {
             </form>
           </div>
 
-          {/* WebSocket messages */}
-          {progress && !loading && (
-           <div style={{ marginTop: "20px" }}>
-            <Alert severity="info">{progress}</Alert>
-           </div>
-           )}
+{/* WebSocket messages area */}
+<div style={{
+  marginTop: "20px",
+  maxHeight: "300px",
+  overflowY: "auto",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  padding: "10px",
+  backgroundColor: "#f5f5f5"
+}}>
+  {messages.slice(-15).map((msg, index) => (
+    <Alert
+      key={index}
+      severity="info"
+      style={{ marginBottom: "5px", fontSize: "0.85rem" }}
+    >
+      [ID: {msg.decision_id}] → {msg.status}: {msg.detail}
+    </Alert>
+  ))}
+</div>
 
           {/* Лоадер */}
           {loading && (

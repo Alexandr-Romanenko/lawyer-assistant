@@ -1,12 +1,10 @@
 import Alert from '@mui/joy/Alert';
 import CircularProgress from '@mui/joy/CircularProgress';
-//import {Link} from "react-router-dom"
-import {Controller, useForm} from "react-hook-form"
+import {useForm} from "react-hook-form"
 import AxiosInstance from "../Axios/Axios.jsx";
-//import { useNavigate } from "react-router-dom"
 import {yupResolver} from "@hookform/resolvers/yup"
 import * as yup from "yup"
-import { Button, Input } from "@mui/material";
+import { Button } from "@mui/material";
 import {useState} from "react";
 import PasswordField from "../FormFields/PasswordField.jsx";
 import InputField from "../FormFields/InputField.jsx";
@@ -64,8 +62,8 @@ const RegistrationPage = () => {
 
     AxiosInstance.post(`user/register/`, {
       email: data.email,
-      firstName: data.firstName,
-      secondName: data.secondName,
+      first_name: data.firstName,
+      second_name: data.secondName,
       password: data.password,
       password2: data.password2,
     })
