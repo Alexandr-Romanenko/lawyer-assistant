@@ -1,20 +1,20 @@
 import React from "react";
 import { TextField } from "@mui/material";
-import { Controller } from 'react-hook-form';
+import { Controller } from "react-hook-form";
 
 export default function InputField(props) {
   const { id, label, name, control } = props;
 
   const getAutoComplete = (name) => {
     switch (name) {
-      case 'firstName':
-        return 'given-name';
-      case 'secondName':
-        return 'family-name';
-      case 'email':
-        return 'email';
+      case "firstName":
+        return "given-name";
+      case "secondName":
+        return "family-name";
+      case "email":
+        return "email";
       default:
-        return 'off'; // Для других полей можно использовать 'off'
+        return "off"; // Для других полей можно использовать 'off'
     }
   };
 

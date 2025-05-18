@@ -1,11 +1,10 @@
-
 h1 {
   font-size: 42px;
   line-height: 1.5;
 }
 
 .registration-form {
-    width: 600px;
+  width: 600px;
 }
 
 .item-text-input {
@@ -19,13 +18,13 @@ h1 {
 }
 
 .login-form {
-    width: 600px;
+  width: 600px;
 }
 
 .itemBox.links {
-    margin-top: 30px;
+  margin-top: 30px;
 }
 
 .link-item {
-    padding: 5px;
+  padding: 5px;
 }

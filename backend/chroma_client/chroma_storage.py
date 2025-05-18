@@ -1,14 +1,14 @@
 import os
-from typing import List, Optional, Dict, Any, Tuple
-
 import torch
-import logging
+
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from config.app_config import AppConfig
 from langchain.schema import Document
-#from loguru import logger
 
+from typing import List, Optional, Dict, Any, Tuple
+
+import logging
 logger = logging.getLogger(__name__)
 
 
@@ -54,6 +54,8 @@ class ChromaDBHandler:
             self.load_or_create_db()
 
         try:
+            for doc in documents:
+                logger.info(f"***ДОКУМЕНТ***: {doc.page_content[:100]}...")  # первые 100 символов
             self.db.add_documents(documents=documents, ids=ids)
             logger.info(f"Документ: «{decision_id}», добавлен в Векторное хранилище")
 

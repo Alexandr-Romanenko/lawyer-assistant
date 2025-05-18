@@ -1,37 +1,53 @@
-import Alert from '@mui/joy/Alert';
-import CircularProgress from '@mui/joy/CircularProgress';
-import {useForm} from "react-hook-form"
+import Alert from "@mui/joy/Alert";
+import CircularProgress from "@mui/joy/CircularProgress";
+import { useForm } from "react-hook-form";
 import AxiosInstance from "../Axios/Axios.jsx";
-import {yupResolver} from "@hookform/resolvers/yup"
-import * as yup from "yup"
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { Button } from "@mui/material";
-import {useState} from "react";
+import { useState } from "react";
 import PasswordField from "../FormFields/PasswordField.jsx";
 import InputField from "../FormFields/InputField.jsx";
 import Box from "@mui/joy/Box";
-import "./RegistrationPage.css"
+import "./RegistrationPage.css";
 
-const schema = yup
-    .object({
-        email: yup.string().email('Field expects an email').required('Email is a required field'),
-        firstName: yup.string().required('First name is a required field')
-                   .max(254)
-                   .matches(/^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\- ]+$/, 'First name must contain only letters'),
-        secondName: yup.string().required('Second name is a required field')
-                   .max(254)
-                   .matches(/^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\- ]+$/, 'Second name must contain only letters'),
-        password: yup.string()
-                   .required('Password is a required field')
-                   .min(8,'Password must be at least 8 characters')
-                   .matches(/[A-Z]/,'Password must contain at least one uppercase letter')
-                   .matches(/[a-z]/,'Password must contain at least one lower case letter')
-                   .matches(/[0-9]/,'Password must contain at least one number')
-                   .matches(/[!@#$%^&*(),.?":;{}|<>+]/, 'Password must contain at least one special character'),
-        password2: yup.string().required('Password confirmation is a required field')
-                   .oneOf([yup.ref('password'),null], 'Passwords must match')
-
-    })
-
+const schema = yup.object({
+  email: yup
+    .string()
+    .email("Field expects an email")
+    .required("Email is a required field"),
+  firstName: yup
+    .string()
+    .required("First name is a required field")
+    .max(254)
+    .matches(
+      /^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\- ]+$/,
+      "First name must contain only letters"
+    ),
+  secondName: yup
+    .string()
+    .required("Second name is a required field")
+    .max(254)
+    .matches(
+      /^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\- ]+$/,
+      "Second name must contain only letters"
+    ),
+  password: yup
+    .string()
+    .required("Password is a required field")
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[a-z]/, "Password must contain at least one lower case letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(
+      /[!@#$%^&*(),.?":;{}|<>+]/,
+      "Password must contain at least one special character"
+    ),
+  password2: yup
+    .string()
+    .required("Password confirmation is a required field")
+    .oneOf([yup.ref("password"), null], "Passwords must match"),
+});
 
 const RegistrationPage = () => {
   const {
@@ -41,13 +57,13 @@ const RegistrationPage = () => {
     formState: { errors, isValid },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
-        firstName: '',
-        secondName: '',
-        email: '',
-        password: '',
-        password2: '',
+      firstName: "",
+      secondName: "",
+      email: "",
+      password: "",
+      password2: "",
     },
   });
 
@@ -72,24 +88,24 @@ const RegistrationPage = () => {
         setSuccessMsg("Реєстрація пройшла успішно!");
         reset();
       })
-.catch((err) => {
-  console.error("Registration error:", err);
+      .catch((err) => {
+        console.error("Registration error:", err);
 
-  if (err.response) {
-    const backendErrors = err.response;
+        if (err.response) {
+          const backendErrors = err.response;
 
-    // Получаем первое сообщение об ошибке
-    const firstError = Object.values(backendErrors)?.[0]?.[0];
+          // Получаем первое сообщение об ошибке
+          const firstError = Object.values(backendErrors)?.[0]?.[0];
 
-    if (firstError) {
-      setError(firstError); // показываем только одну ошибку
-    } else {
-      setError("Помилка під час реєстрації. Спробуйте ще раз.");
-    }
-  } else {
-    setError("Помилка під час реєстрації. Спробуйте ще раз.");
-  }
-})
+          if (firstError) {
+            setError(firstError); // показываем только одну ошибку
+          } else {
+            setError("Помилка під час реєстрації. Спробуйте ще раз.");
+          }
+        } else {
+          setError("Помилка під час реєстрації. Спробуйте ще раз.");
+        }
+      })
 
       .finally(() => {
         setLoading(false);
@@ -105,10 +121,9 @@ const RegistrationPage = () => {
           </div>
 
           <form className="registration-form" onSubmit={handleSubmit(onSubmit)}>
-
-
             {/* First name */}
-            <Box className={"itemBox"}
+            <Box
+              className={"itemBox"}
               sx={{
                 py: 2,
                 display: "grid",
@@ -117,16 +132,17 @@ const RegistrationPage = () => {
                 flexWrap: "wrap",
               }}
             >
-                <InputField
-                    id={"firstName"}
-                    label={"First name"}
-                    name ={"firstName"}
-                    control={control}
-                    />
+              <InputField
+                id={"firstName"}
+                label={"First name"}
+                name={"firstName"}
+                control={control}
+              />
             </Box>
 
             {/* Second name */}
-            <Box className={"itemBox"}
+            <Box
+              className={"itemBox"}
               sx={{
                 py: 2,
                 display: "grid",
@@ -135,15 +151,17 @@ const RegistrationPage = () => {
                 flexWrap: "wrap",
               }}
             >
-                <InputField
-                    id={"secondName"}
-                    label={"Second name"}
-                    name ={"secondName"}
-                    control={control}/>
+              <InputField
+                id={"secondName"}
+                label={"Second name"}
+                name={"secondName"}
+                control={control}
+              />
             </Box>
 
             {/* Email */}
-            <Box className={"itemBox"}
+            <Box
+              className={"itemBox"}
               sx={{
                 py: 2,
                 display: "grid",
@@ -152,15 +170,17 @@ const RegistrationPage = () => {
                 flexWrap: "wrap",
               }}
             >
-                <InputField
-                    id={"email"}
-                    label={"Email"}
-                    name ={"email"}
-                    control={control}/>
+              <InputField
+                id={"email"}
+                label={"Email"}
+                name={"email"}
+                control={control}
+              />
             </Box>
 
             {/* Password */}
-            <Box className={"itemBox"}
+            <Box
+              className={"itemBox"}
               sx={{
                 py: 2,
                 display: "grid",
@@ -169,15 +189,17 @@ const RegistrationPage = () => {
                 flexWrap: "wrap",
               }}
             >
-                <PasswordField
-                    id={"password"}
-                    label={"Password"}
-                    name ={"password"}
-                    control={control}/>
+              <PasswordField
+                id={"password"}
+                label={"Password"}
+                name={"password"}
+                control={control}
+              />
             </Box>
 
             {/* Password2 */}
-            <Box className={"itemBox"}
+            <Box
+              className={"itemBox"}
               sx={{
                 py: 2,
                 display: "grid",
@@ -186,18 +208,19 @@ const RegistrationPage = () => {
                 flexWrap: "wrap",
               }}
             >
-                <PasswordField
-                    id={"password2"}
-                    label={"Confirm password"}
-                    name ={"password2"}
-                    control={control}/>
+              <PasswordField
+                id={"password2"}
+                label={"Confirm password"}
+                name={"password2"}
+                control={control}
+              />
             </Box>
 
             <Button
-                   variant="contained"
-                   type="submit"
-                   disabled={!isValid || loading}
-                   sx={{ width: "30%" }}
+              variant="contained"
+              type="submit"
+              disabled={!isValid || loading}
+              sx={{ width: "30%" }}
             >
               {loading ? "Registration..." : "Register"}
             </Button>
@@ -227,4 +250,4 @@ const RegistrationPage = () => {
   );
 };
 
-export default RegistrationPage
+export default RegistrationPage;

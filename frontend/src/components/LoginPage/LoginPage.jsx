@@ -12,7 +12,7 @@ import AxiosInstance from "../Axios/Axios.jsx";
 import InputField from "../FormFields/InputField.jsx";
 import PasswordField from "../FormFields/PasswordField.jsx";
 
-import "./LoginPage.css"
+import "./LoginPage.css";
 
 const schema = yup.object({
   email: yup
@@ -158,8 +158,13 @@ const LoginPage = () => {
 
           {/* Links */}
           <Box className={"itemBox links"} sx={{ flexDirection: "column" }}>
-            <div className="link-item">No account yet? Please <Link to="/register">register</Link></div>
-            <div className="link-item">Password forgotten? Click <Link to="/request/password_reset">here</Link></div>
+            <div className="link-item">
+              No account yet? Please <Link to="/register">register</Link>
+            </div>
+            <div className="link-item">
+              Password forgotten? Click{" "}
+              <Link to="/request/password_reset">here</Link>
+            </div>
           </Box>
         </div>
       </div>

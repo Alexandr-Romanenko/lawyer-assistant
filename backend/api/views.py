@@ -24,12 +24,10 @@ class DecisionUploadView(APIView):
             return Response({"error": "No decision IDs found in input_text."}, status=status.HTTP_400_BAD_REQUEST)
 
         user_channel_id = self.request.user.uuid_channel
-
         set_tasks = processor.process_all(user_channel_id)
-        message = f"Successfully sent {len(set_tasks)} decision for processing"
-        result = {"message": message}
+        uploading_result = {"ids_array": set_tasks, "user_channel_id": user_channel_id}
 
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(uploading_result, status=status.HTTP_200_OK)
 
 
 class SearchView(APIView):
@@ -88,7 +86,7 @@ class SearchView(APIView):
                     "chunks": chunks
                 })
 
-            return Response({"result": result_data}, status=status.HTTP_200_OK)
+            return Response({"search_result": result_data}, status=status.HTTP_200_OK)
 
         except Exception as e:
             logger.exception("Search failed")
