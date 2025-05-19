@@ -5,11 +5,12 @@ import AxiosInstance from "../Axios/Axios.jsx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
 import PasswordField from "../FormFields/PasswordField.jsx";
 import InputField from "../FormFields/InputField.jsx";
 import Box from "@mui/joy/Box";
 import "./RegistrationPage.css";
+import {Link} from "react-router-dom";
 
 const schema = yup.object({
   email: yup
@@ -225,6 +226,13 @@ const RegistrationPage = () => {
               {loading ? "Registration..." : "Register"}
             </Button>
           </form>
+
+          {/* Links */}
+          <Box className={"itemBox links"} sx={{ flexDirection: "column" }}>
+            <div className="link-item">
+              If you are already registered, then <Link to="/">login</Link>
+            </div>
+          </Box>
 
           {loading && (
             <div style={{ marginTop: "20px" }}>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import "./HomePage.css";
+import "./SearchPage.css";
 import SearchMethodSelector from "../SearchMethodSelector/SearchMethodSelector.jsx";
 
 import AxiosInstance from "../Axios/Axios.jsx";
@@ -11,7 +11,7 @@ import { Container } from "@mui/joy";
 import Typography from "@mui/material/Typography";
 
 
-const HomePage = () => {
+const SearchPage = () => {
   const [search, setSearch] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false); // состояние загрузки
@@ -55,7 +55,7 @@ const HomePage = () => {
   return (
     <section>
       <div className="container">
-        <div className="home-page-container">
+        <div className="search-page-container">
           <div className="hero-section">
             <h1 className="hero-title">Court decision analyzer</h1>
           </div>
@@ -202,4 +202,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default SearchPage;

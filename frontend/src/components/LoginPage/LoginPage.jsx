@@ -66,7 +66,7 @@ const LoginPage = () => {
         localStorage.setItem("access", response.data.access);
         localStorage.setItem("refresh", response.data.refresh);
         reset();
-        navigate("/home");
+        navigate("/search");
       })
       .catch((err) => {
         console.error("Login error:", err);

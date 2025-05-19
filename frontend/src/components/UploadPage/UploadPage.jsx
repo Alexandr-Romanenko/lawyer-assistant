@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import "./HomePage.css";
 import ProgressBar from "../ProgressBar/ProgressBar.jsx";
 
 import AxiosInstance from "../Axios/Axios.jsx";
