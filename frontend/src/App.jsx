@@ -19,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
+          
         </Routes>
       ) : (
         <Navbar

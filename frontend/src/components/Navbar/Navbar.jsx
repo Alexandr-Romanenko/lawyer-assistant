@@ -14,6 +14,8 @@ import InfoIcon from "@mui/icons-material/Info";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
+import {Button} from "@mui/material";
 
 const drawerWidth = 240;
 
@@ -30,73 +32,133 @@ export default function Navbar(props) {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      >
+          <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" noWrap component="div">
-            Clipped drawer
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
-          <List>
-            <ListItem key={1} disablePadding>
-              <ListItemButton
-                component={Link}
+             <Box sx={{ overflow: "auto" }}>
+           <List  sx={{ display: "flex" }}>
+             <ListItem key={1} disablePadding>
+               <ListItemButton
+                 component={Link}
                 to="/home"
                 selected={"/home" === path}
               >
-                <ListItemIcon>
+                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
-                <ListItemText primary={"Home"} />
-              </ListItemButton>
-            </ListItem>
+                 <ListItemText primary={"Home"} />
+               </ListItemButton>
+             </ListItem>
 
-            <ListItem key={2} disablePadding>
-              <ListItemButton
-                component={Link}
-                to="/about"
-                selected={"/about" === path}
-              >
-                <ListItemIcon>
-                  <InfoIcon />
-                </ListItemIcon>
-                <ListItemText primary={"About"} />
-              </ListItemButton>
-            </ListItem>
+             <ListItem key={2} disablePadding>
+               <ListItemButton
+                 component={Link}
+                 to="/about"
+                 selected={"/about" === path}
+               >
+                 <ListItemIcon>
+                   <InfoIcon />
+                 </ListItemIcon>
+                 <ListItemText primary={"About"} />
+               </ListItemButton>
+             </ListItem>
 
-            <ListItem key={3} disablePadding>
-              <ListItemButton onClick={logoutUser}>
-                <ListItemIcon>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Logout"} />
-              </ListItemButton>
-            </ListItem>
-          </List>
-        </Box>
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <Toolbar />
-        {content}
-      </Box>
+             <ListItem key={3} disablePadding>
+               <ListItemButton onClick={logoutUser}>
+                 <ListItemIcon>
+                   <LogoutIcon />
+                 </ListItemIcon>
+                 <ListItemText primary={"Logout"} />
+               </ListItemButton>
+             </ListItem>
+           </List>
+         </Box>
+
+
+
+
+
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            News
+          </Typography>
+          <Button color="inherit">Login</Button>
+        </Toolbar>
+      </AppBar>
     </Box>
+
+
+
+
+
+
+
+    // <Box sx={{ display: "flex" }}>
+    //   <CssBaseline />
+    //   <AppBar
+    //     position="fixed"
+    //     sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    //   >
+    //     <Toolbar>
+    //       <Typography variant="h6" noWrap component="div">
+    //         Clipped drawer
+    //       </Typography>
+    //     </Toolbar>
+    //   </AppBar>
+    //   <Drawer
+    //     variant="permanent"
+    //     sx={{
+    //       width: drawerWidth,
+    //       flexShrink: 0,
+    //       [`& .MuiDrawer-paper`]: {
+    //         width: drawerWidth,
+    //         boxSizing: "border-box",
+    //       },
+    //     }}
+    //   >
+    //     <Toolbar />
+    //     <Box sx={{ overflow: "auto" }}>
+    //       <List>
+    //         <ListItem key={1} disablePadding>
+    //           <ListItemButton
+    //             component={Link}
+    //             to="/home"
+    //             selected={"/home" === path}
+    //           >
+    //             <ListItemIcon>
+    //               <HomeIcon />
+    //             </ListItemIcon>
+    //             <ListItemText primary={"Home"} />
+    //           </ListItemButton>
+    //         </ListItem>
+    //
+    //         <ListItem key={2} disablePadding>
+    //           <ListItemButton
+    //             component={Link}
+    //             to="/about"
+    //             selected={"/about" === path}
+    //           >
+    //             <ListItemIcon>
+    //               <InfoIcon />
+    //             </ListItemIcon>
+    //             <ListItemText primary={"About"} />
+    //           </ListItemButton>
+    //         </ListItem>
+    //
+    //         <ListItem key={3} disablePadding>
+    //           <ListItemButton onClick={logoutUser}>
+    //             <ListItemIcon>
+    //               <LogoutIcon />
+    //             </ListItemIcon>
+    //             <ListItemText primary={"Logout"} />
+    //           </ListItemButton>
+    //         </ListItem>
+    //       </List>
+    //     </Box>
+    //   </Drawer>
+    //   <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+    //     <Toolbar />
+    //     {content}
+    //   </Box>
+    // </Box>
   );
 }
