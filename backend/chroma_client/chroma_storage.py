@@ -54,8 +54,6 @@ class ChromaDBHandler:
             self.load_or_create_db()
 
         try:
-            for doc in documents:
-                logger.info(f"***ДОКУМЕНТ***: {doc.page_content[:100]}...")  # первые 100 символов
             self.db.add_documents(documents=documents, ids=ids)
             logger.info(f"Документ: «{decision_id}», добавлен в Векторное хранилище")
 

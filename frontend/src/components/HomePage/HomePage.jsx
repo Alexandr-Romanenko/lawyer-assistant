@@ -32,16 +32,36 @@ const HomePage = () => {
     };
 
     ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log("WebSocket message:", data);
+  try {
+    const data = JSON.parse(event.data);
+    console.log("WebSocket message:", data);
 
-        // Добавим новое сообщение в список
-        setMessages((prev) => [...prev, data]);
-      } catch (err) {
-        console.error("Failed to parse WebSocket message", err);
-      }
-    };
+    // Разделяем по типу сообщения
+    if (data.type === "progress") {
+      // Можно передать в прогрессбар через setProgress(data)
+      // или просто тоже пушить в messages
+      setMessages((prev) => [...prev, data]);
+    } else if (data.type === "status") {
+      setMessages((prev) => [...prev, data]);
+    } else {
+      setMessages((prev) => [...prev, data]); // общий случай
+    }
+  } catch (err) {
+    console.error("Failed to parse WebSocket message", err);
+  }
+};
+
+    // ws.onmessage = (event) => {
+    //   try {
+    //     const data = JSON.parse(event.data);
+    //     console.log("WebSocket message:", data);
+    //
+    //     // Добавим новое сообщение в список
+    //     setMessages((prev) => [...prev, data]);
+    //   } catch (err) {
+    //     console.error("Failed to parse WebSocket message", err);
+    //   }
+    // };
 
     ws.onerror = (err) => {
       console.error("WebSocket error:", err);
@@ -239,9 +259,11 @@ const HomePage = () => {
           {/* Progress Bar */}
           {uploadingResult && uploadingResult.ids_array && uploadingResult.user_channel_id && (
   <ProgressBar
-    taskIds={uploadingResult.ids_array}
-    userChannelId={uploadingResult.user_channel_id}
-  />
+  taskIds={uploadingResult.ids_array}
+  userChannelId={uploadingResult.user_channel_id}
+  socket={socketRef.current}
+  messages={messages}
+/>
 )}
 
           {/* WebSocket messages area */}

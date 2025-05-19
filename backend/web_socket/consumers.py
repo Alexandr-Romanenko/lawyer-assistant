@@ -44,20 +44,39 @@ class ProgressConsumer(AsyncWebsocketConsumer):
             return
 
         await self.accept()
-        logger.info(f"WebSocket accepted for user {self.user.id}")
+        logger.info(f"WebSocket accepted for user {self.user.uuid_channel}")
         asyncio.create_task(self.listen_redis())
 
     async def listen_redis(self):
         try:
             pubsub = self.redis.pubsub()
             await pubsub.subscribe(self.channel_name_redis)
+
             async for message in pubsub.listen():
                 if message["type"] == "message":
-                    logger.info(f"Sending message to frontend: {message['data']}")
-                    await self.send(message["data"].decode())
+                    try:
+                        data = message["data"]
+                        if isinstance(data, bytes):
+                            data = data.decode()
+                        logger.info(f"Sending message to frontend: {data}")
+                        await self.send(text_data=data)
+                    except Exception as decode_error:
+                        logger.error(f"Error decoding message: {decode_error}")
         except Exception as e:
             logger.error(f"Error listening to Redis: {e}")
             await self.close()
+
+    # async def listen_redis(self):
+    #     try:
+    #         pubsub = self.redis.pubsub()
+    #         await pubsub.subscribe(self.channel_name_redis)
+    #         async for message in pubsub.listen():
+    #             if message["type"] == "message":
+    #                 logger.info(f"Sending message to frontend: {message['data']}")
+    #                 await self.send(message["data"].decode())
+    #     except Exception as e:
+    #         logger.error(f"Error listening to Redis: {e}")
+    #         await self.close()
 
     async def disconnect(self, close_code):
         try:

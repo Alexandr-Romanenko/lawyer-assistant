@@ -19,13 +19,16 @@ def decision_processing_task(self, url: str, decision_id: str, user_channel_id: 
 
     redis_client = redis.Redis(host="localhost", port=6379, db=0)
 
-    def notify(status: str, detail: str = ""):
+    def notify(status, detail):
         message = {
+            "type": "progress",
             "decision_id": decision_id,
             "status": status,
             "detail": detail,
         }
         redis_client.publish(f"user:{user_channel_id}", json.dumps(message))
+
+
 
     try:
         decision, _ = CourtDecision.objects.get_or_create(decision_id=decision_id)

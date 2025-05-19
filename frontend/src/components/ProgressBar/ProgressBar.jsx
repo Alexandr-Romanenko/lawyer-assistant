@@ -21,37 +21,32 @@ LinearProgressWithLabel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-export default function ProgressBar({ taskIds, userChannelId }) {
+export default function ProgressBar({ taskIds, messages }) {
   const [completed, setCompleted] = useState([]);
 
   useEffect(() => {
     if (!taskIds || taskIds.length === 0) return;
 
-    const ws = new WebSocket(`ws://localhost:8000/ws/user/${userChannelId}/`);
+    const relevantIds = new Set(taskIds);
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.status === "success" || data.status === "done") {
-        setCompleted((prev) => {
-          if (!prev.includes(data.decision_id)) {
-            return [...prev, data.decision_id];
-          }
-          return prev;
-        });
-      }
-    };
+    // Фильтруем пришедшие сообщения и обновляем прогресс
+    const newCompleted = messages
+      .filter(
+        (msg) =>
+          relevantIds.has(msg.decision_id) &&
+          ["done", "success"].includes(msg.status)
+      )
+      .map((msg) => msg.decision_id);
 
-    return () => {
-      ws.close();
-    };
-  }, [taskIds, userChannelId]);
+    setCompleted(Array.from(new Set(newCompleted))); // убираем дубликаты
+  }, [messages, taskIds]);
 
-const progress = taskIds?.length
-  ? (completed.length / taskIds.length) * 100
-  : 0;
+  const progress = taskIds?.length
+    ? (completed.length / taskIds.length) * 100
+    : 0;
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "100%", my: 2 }}>
       <Typography variant="h6" gutterBottom>
         Обработка решений
       </Typography>
@@ -64,6 +59,6 @@ const progress = taskIds?.length
 }
 
 ProgressBar.propTypes = {
-  taskIds: PropTypes.arrayOf(PropTypes.string).isRequired,
-  userChannelId: PropTypes.string.isRequired,
+  taskIds: PropTypes.array.isRequired,
+  messages: PropTypes.array.isRequired,
 };
