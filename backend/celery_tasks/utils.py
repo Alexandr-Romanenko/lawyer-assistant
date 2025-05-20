@@ -1,4 +1,3 @@
-import json
 import os
 import re
 
@@ -11,7 +10,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from typing import List
 from email.message import EmailMessage
 
-import user
 from config.app_config import AppConfig
 from user.models import User
 
@@ -38,7 +36,7 @@ def clean_text(text: str) -> str:
 
 def extract_text_from_url(url: str) -> str:
     """
-    Загружает и извлекает текст со страницы по указанному URL.
+    Downloads and extracts text from a page at the specified URL.
     """
     def bs4_extractor(html: str) -> str:
         soup = BeautifulSoup(html, "lxml")
@@ -50,25 +48,24 @@ def extract_text_from_url(url: str) -> str:
     return cleaned_text
 
 def extract_metadata(text: str) -> DecisionMetadata:
-    # Универсальное регулярное выражение
+    # Universal regular expression
     pattern = r"(?:Категорія справи|Справа)?\s*№?\s*([\dа-яА-Я\-]+(?:/[\dа-яА-Я\-]+)+)"
-    # Ищем все подходящие номера в тексте
+    # Search for all suitable numbers in the text
     case_numbers = re.findall(pattern, text, flags=re.IGNORECASE)
-    # Выбираем первый номер (если важно только один)
+    # We choose the first number
     case_number = case_numbers[0] if case_numbers else "unspecified"
 
-    # Номер провадження
+    # Proceedings number
     proceeding_number_match = re.search(r"(провадження)?\s*№\s*(\d+/\d+/\d+/\d+)", text, re.IGNORECASE)
     proceeding_number = proceeding_number_match.group(2) if proceeding_number_match else "unspecified"
 
     return DecisionMetadata(
         number=case_number,
         proceeding=proceeding_number,
-        # date=decision_date
     )
 
 def split_text_into_chunks(text: str, decision_id: str, decision_metadata: DecisionMetadata) -> List[Document]:
-    """Разделение текста на чанки с сохранением метаданных."""
+
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=AppConfig.MAX_CHUNK_SIZE,
         chunk_overlap=AppConfig.CHUNK_OVERLAP,
@@ -88,12 +85,6 @@ def split_text_into_chunks(text: str, decision_id: str, decision_metadata: Decis
     ]
 
     return documents
-    # import logging
-    # logger = logging.getLogger(__name__)
-    #logger.info(documents)
-    # with open("chunks_debug.txt", "w", encoding="utf-8") as f:
-    #     for chunk in chunks:
-    #         f.write(f"{chunk.page_content}\n{chunk.metadata}\n\n")
 
 def get_email_template_user_verification(user_id: int, verification_code: str):
 
