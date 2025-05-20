@@ -10,7 +10,7 @@ sentence-transformers
 langchain-chroma
 djangorestframework-simplejwt
 redis
-langchain-huggingface>=0.0.1
+langchain-huggingface
 channels
 channels_redis
 aioredis

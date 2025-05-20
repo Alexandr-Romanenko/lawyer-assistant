@@ -21,7 +21,7 @@ class ChromaDBHandler:
 
     def init_embedding_model(self):
         if not self.embedding_model:
-            logger.info("Инициализация модели эмбеддингов...")
+            logger.info("Initialization of the embedding model")
             self.embedding_model = HuggingFaceEmbeddings(
                 model_name=AppConfig.LM_MODEL_NAME,
                 model_kwargs={"device": "cpu"},
@@ -33,14 +33,14 @@ class ChromaDBHandler:
         db_exists = os.path.exists(self.persist_directory) and os.listdir(self.persist_directory)
 
         if db_exists:
-            logger.info("Загрузка существующей базы Chroma...")
+            logger.info("Loading an existing Chroma database")
             self.db = Chroma(
                 embedding_function=self.embedding_model,
                 persist_directory=self.persist_directory,
                 collection_name=self.collection_name,
             )
         else:
-            logger.info(f"Создание новой базы Chroma в каталоге: {self.persist_directory}")
+            logger.info(f"Creating a new Chroma base in the catalog: {self.persist_directory}")
             self.db = Chroma.from_texts(
                 texts=[],
                 embedding=self.embedding_model,
@@ -55,23 +55,23 @@ class ChromaDBHandler:
 
         try:
             self.db.add_documents(documents=documents, ids=ids)
-            logger.info(f"Документ: «{decision_id}», добавлен в Векторное хранилище")
+            logger.info(f"Document: «{decision_id}» added to Vector Storage")
 
         except Exception as e:
-            logger.exception(f"Ошибка при добавлении документов: {e}")
+            logger.exception(f"Error adding documents: {e}")
             raise
 
     def similarity_search(self, query: str, with_score: bool = False, k: int = 10):
         if not self.db:
             self.load_or_create_db()
 
-        logger.info(f"Поиск похожих документов: «{query}», top_k={k}")
+        logger.info(f"Search for similar documents: «{query}», top_k={k}")
         try:
             if with_score:
                 return self.db.similarity_search_with_score(query=query, k=k)
             return self.db.similarity_search(query=query, k=k)
         except Exception as e:
-            logger.exception(f"Ошибка при поиске: {e}")
+            logger.exception(f"Error while searching: {e}")
             raise
 
     def similarity_search_by_vector(
@@ -85,17 +85,17 @@ class ChromaDBHandler:
         if not self.db:
             self.load_or_create_db()
 
-        logger.info("Поиск по вектору (или тексту с преобразованием)...")
+        logger.info("Search by vector (or text with transformation)")
 
-        # Получаем вектор из текста, если передана строка
+        # Get a vector from text if a string is passed
         if isinstance(query, str):
             if not self.embedding_model:
                 self.init_embedding_model()
             embedding = self.embedding_model.embed_query(query)
         else:
-            embedding = query  # уже вектор
+            embedding = query
 
-        # доступ к коллекции
+        # Access to collection
         collection = self.db._collection
 
         try:
@@ -114,13 +114,13 @@ class ChromaDBHandler:
 
             results = []
             for doc, meta, dist in zip(documents, metadatas, distances):
-                score = 1 - dist if dist is not None else None  # косинусная мера
+                score = 1 - dist if dist is not None else None
                 results.append((Document(page_content=doc, metadata=meta), score))
 
             return results
 
         except Exception as e:
-            logger.exception(f"Ошибка при поиске по вектору: {e}")
+            logger.exception(f"Error while searching by vector: {e}")
             raise
 
     def similarity_search_by_vector_with_relevance_scores(
@@ -134,7 +134,7 @@ class ChromaDBHandler:
         if not self.db:
             self.load_or_create_db()
 
-        logger.info("Поиск по вектору с оценками релевантности...")
+        logger.info("Vector search with relevance scores")
 
         try:
             result = self.db._collection.query(
@@ -153,17 +153,17 @@ class ChromaDBHandler:
             results: List[Tuple[Document, float]] = []
             for doc, meta, dist in zip(documents, metadatas, distances):
                 if doc is not None:
-                    relevance_score = dist  # меньше — лучше
+                    relevance_score = dist
                     results.append((Document(page_content=doc, metadata=meta), relevance_score))
 
             return results
 
         except Exception as e:
-            logger.exception(f"Ошибка при поиске с оценками релевантности: {e}")
+            logger.exception(f"Error when searching with relevance scores: {e}")
             raise
 
     def close(self):
-        logger.info("Закрытие Chroma DB...")
+        logger.info("Closing Chroma DB")
         self.db = None
         if torch.cuda.is_available():
             torch.cuda.empty_cache()

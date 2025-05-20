@@ -29,7 +29,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/upload" element={<UploadPage />} />
-                <Route path="/help" element={<HelpPage/>}/>
+                <Route path="/help" element={<HelpPage />} />
               </Route>
             </Routes>
           }

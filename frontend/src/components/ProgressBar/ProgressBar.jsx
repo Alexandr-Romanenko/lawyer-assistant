@@ -28,17 +28,17 @@ export default function ProgressBar({ taskIds, messages }) {
     if (!taskIds || taskIds.length === 0) return;
 
     const relevantIds = new Set(taskIds);
+    const completedStatuses = ["done", "already_done", "success"];
 
-    // Фильтруем пришедшие сообщения и обновляем прогресс
     const newCompleted = messages
       .filter(
         (msg) =>
           relevantIds.has(msg.decision_id) &&
-          ["done", "success"].includes(msg.status)
+          completedStatuses.includes(msg.status)
       )
       .map((msg) => msg.decision_id);
 
-    setCompleted(Array.from(new Set(newCompleted))); // убираем дубликаты
+    setCompleted(Array.from(new Set(newCompleted)));
   }, [messages, taskIds]);
 
   const progress = taskIds?.length
@@ -48,11 +48,11 @@ export default function ProgressBar({ taskIds, messages }) {
   return (
     <Box sx={{ width: "100%", my: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Обработка решений
+        Обробка рішень
       </Typography>
       <LinearProgressWithLabel value={progress} />
       <Typography variant="body2" mt={1}>
-        {`Завершено ${completed.length} из ${taskIds.length}`}
+        {`Виконано ${completed.length} з ${taskIds.length}`}
       </Typography>
     </Box>
   );

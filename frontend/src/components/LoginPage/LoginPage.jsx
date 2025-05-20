@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+
+import AxiosInstance from "../Axios/Axios.jsx";
+import InputField from "../FormFields/InputField.jsx";
+import PasswordField from "../FormFields/PasswordField.jsx";
+import "./LoginPage.css";
+
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button } from "@mui/material";
 import Alert from "@mui/joy/Alert";
 import CircularProgress from "@mui/joy/CircularProgress";
 import Box from "@mui/joy/Box";
-import { Link, useNavigate } from "react-router-dom";
-
-import AxiosInstance from "../Axios/Axios.jsx";
-import InputField from "../FormFields/InputField.jsx";
-import PasswordField from "../FormFields/PasswordField.jsx";
-
-import "./LoginPage.css";
 
 const schema = yup.object({
   email: yup
@@ -69,9 +69,14 @@ const LoginPage = () => {
         navigate("/search");
       })
       .catch((err) => {
-        console.error("Login error:", err);
-        setError("Login failed. Please check your credentials.");
-      })
+  let message = "Сталася помилка. Спробуйте ще раз.";
+  if (err.response && err.response.data && err.response.data.detail) {
+    message = err.response.data.detail;
+  } else if (err.message) {
+    message = err.message;
+  }
+  setError(message);
+})
       .finally(() => {
         setLoading(false);
       });
@@ -163,7 +168,7 @@ const LoginPage = () => {
             </div>
             <div className="link-item">
               Password forgotten? Click{" "}
-              <Link to="/request/password_reset">here</Link>
+              <Link to="/request/password_reset">here</Link> // need to realise this component
             </div>
           </Box>
         </div>

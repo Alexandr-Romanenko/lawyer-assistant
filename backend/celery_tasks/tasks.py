@@ -9,7 +9,7 @@ from api.models import DecisionStatus, CourtDecision
 from chroma_client.chroma_storage import ChromaDBHandler
 
 import logging
-logger = logging.getLogger("tasks")
+logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, max_retries=2, queue="decision_processing")

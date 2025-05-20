@@ -14,7 +14,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
     email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all(), message="Пользователь с таким email уже существует.")]
+        validators=[UniqueValidator(queryset=User.objects.all(), message="A user with this email already exists.")]
     )
 
     class Meta:
@@ -23,9 +23,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_name(self, value, field_name):
         if len(value) > 254:
-            raise serializers.ValidationError({field_name: "Имя не должно превышать 254 символа."})
+            raise serializers.ValidationError({field_name: "The name must not exceed 254 characters."})
         if not re.match(r"^[A-Za-zА-Яа-яЁёІіЇїЄєҐґ' -]+$", value):
-            raise serializers.ValidationError({field_name: "Имя может содержать только буквы, пробелы, апострофы или дефисы."})
+            raise serializers.ValidationError({field_name: "The name may only contain letters, spaces, apostrophes, or hyphens."})
 
     def validate(self, data):
         first_name = data.get('first_name', '').strip()
@@ -37,7 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         self.validate_name(second_name, 'second_name')
 
         if password != password2:
-            raise serializers.ValidationError({'password2': "Пароли не совпадают."})
+            raise serializers.ValidationError({'password2': "Passwords do not match."})
 
         data['first_name'] = first_name
         data['second_name'] = second_name

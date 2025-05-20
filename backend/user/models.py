@@ -35,14 +35,3 @@ class EmailVerification(models.Model):
         except Exception as e:
             logger.exception(f"Error generating verification link for user {user.id}: {e}")
             return None
-
-    # def generate_of_verification_link(user_id: int):
-    #     try:
-    #         code = str(uuid.uuid4())
-    #         new_link = EmailVerification(verification_code=code, user=user_id)
-    #         new_link.save(update_fields=["verification_code", "user"])
-    #
-    #         return new_link.verification_code
-    #
-    #     except Exception as e:
-    #         pass

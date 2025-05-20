@@ -33,29 +33,38 @@ class DecisionUploadView(APIView):
 class SearchView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    valid_search_methods = ("similarity_search",
+                            "similarity_search_by_vector",
+                            "similarity_search_by_vector_with_relevance_scores")
+
     def post(self, request):
+        results = None
         search_words = request.data.get("search")
+        method = request.data.get("method")
 
         if not search_words or not search_words.strip():
             return Response({"error": "You need to pass a few key words."}, status=status.HTTP_400_BAD_REQUEST)
+        if not method or not method.strip() or method not in self.valid_search_methods:
+            method = "similarity_search"
 
         try:
             db_handler = ChromaDBHandler()
             db_handler.init_embedding_model()
 
             # 1 similarity_search
-            # results = db_handler.similarity_search(
-            #     query=search_words, with_score=True, k=100
-            # )
+            if method == "similarity_search":
+                results = db_handler.similarity_search(query=search_words, with_score=True, k=100)
 
             #2 similarity_search_by_vector
-            results = db_handler.similarity_search_by_vector(search_words)
+            if method == "similarity_search_by_vector":
+                results = db_handler.similarity_search_by_vector(search_words)
 
-            # # 3 similarity_search_by_vector_with_relevance_scores
-            # # 3.1. Получаем эмбеддинг из текста
-            # embedding = db_handler.embedding_model.embed_query(search_words)
-            # # 3.2. Поиск по эмбеддингу
-            # results = db_handler.similarity_search_by_vector_with_relevance_scores(embedding, k=100)
+            # 3 similarity_search_by_vector_with_relevance_scores
+            if method == "similarity_search_by_vector_with_relevance_scores":
+                # 3.1. Get embedding from searching words
+                embedding = db_handler.embedding_model.embed_query(search_words)
+                # 3.2. Search by embedding
+                results = db_handler.similarity_search_by_vector_with_relevance_scores(embedding, k=100)
 
             formatted_results = [
                 {
@@ -63,7 +72,7 @@ class SearchView(APIView):
                     "metadata": doc.metadata,
                     "similarity_score": score,
                 }
-                for doc, score in results if score  # убираем None
+                for doc, score in results if score is not None
             ]
 
             grouped_results = defaultdict(list)
@@ -77,7 +86,7 @@ class SearchView(APIView):
                 reverse=True
             )
 
-            # Приводим к удобному формату
+            # Parse the result to a convenient format
             result_data = []
             for doc_id, chunks in top_decisions:
                 result_data.append({
@@ -91,54 +100,3 @@ class SearchView(APIView):
         except Exception as e:
             logger.exception("Search failed")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# class SearchView(APIView):
-#     def post(self, request):
-#         search_words = request.data.get("search")
-#
-#         if not search_words or not search_words.strip():
-#             return Response({"error": "You need to pass a few key words."}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         try:
-#             # Инициализация Chroma и модели
-#             db_handler = ChromaDBHandler()
-#             db_handler.init_embedding_model()
-#
-#             # Синхронный поиск
-#             results = db_handler.similarity_search(
-#                 query=search_words, with_score=True, k=20
-#             )
-#             #print(results)
-#
-#             formatted_results = [
-#                 {
-#                     "text": doc.page_content,
-#                     "metadata": doc.metadata,
-#                     "similarity_score": score,
-#                 }
-#                 for doc, score in results
-#             ]
-#
-#             formatted_results = sorted(
-#                 [r for r in formatted_results if r["similarity_score"]],
-#                 key=lambda r: r["similarity_score"],
-#                 reverse=True
-#             )
-#             return Response({"result": formatted_results}, status=status.HTTP_200_OK)
-#
-#             # formatted_results = sorted(
-#             #     [r for r in formatted_results if r["similarity_score"] >= 0.65],
-#             #     key=lambda r: r["similarity_score"],
-#             #     reverse=True
-#             # )
-#             #
-#             # top_results = formatted_results[:5]
-#             #
-#             # if not top_results or top_results[0]["similarity_score"] < 0.5:
-#             #     return Response({"warning": "No relevant results found."}, status=status.HTTP_200_OK)
-#             #
-#             # return Response({"result": top_results}, status=status.HTTP_200_OK)
-#
-#         except Exception as e:
-#             logger.exception("Search failed")
-#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

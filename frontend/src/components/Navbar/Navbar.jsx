@@ -9,7 +9,6 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 
-
 export default function Navbar(props) {
   const { content } = props;
   const location = useLocation();
@@ -23,59 +22,64 @@ export default function Navbar(props) {
   };
 
   return (
-          <Box sx={{ flexGrow: 1 }}>
+    <Box>
       <AppBar position="static">
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-             <Box sx={{ overflow: "auto" }}>
+        <Toolbar
+          sx={{
+            maxWidth: "1440px",
+            width: "100%",
+            mx: "auto",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box>
+            {/* Menu*/}
+            <List sx={{ display: "flex" }}>
+              <ListItem key={1} disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/search"
+                  selected={"/search" === path}
+                >
+                  <ListItemText primary={"Search"} />
+                </ListItemButton>
+              </ListItem>
 
-                 {/* Menu*/}
-           <List  sx={{ display: "flex" }}>
-             <ListItem key={1} disablePadding>
-               <ListItemButton
-                 component={Link}
-                to="/search"
-                selected={"/search" === path}
-              >
-                 <ListItemText primary={"Search"} />
-               </ListItemButton>
-             </ListItem>
+              <ListItem key={2} disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/upload"
+                  selected={"/upload" === path}
+                >
+                  <ListItemText primary={"Upload"} />
+                </ListItemButton>
+              </ListItem>
 
-             <ListItem key={2} disablePadding>
-               <ListItemButton
-                 component={Link}
-                 to="/upload"
-                 selected={"/upload" === path}
-               >
-                 <ListItemText primary={"Upload"} />
-               </ListItemButton>
-             </ListItem>
+              <ListItem key={3} disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/help"
+                  selected={"/help" === path}
+                >
+                  <ListItemText primary={"Help"} />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </Box>
 
-             <ListItem key={3} disablePadding>
-               <ListItemButton
-                 component={Link}
-                 to="/help"
-                 selected={"/help" === path}
-               >
-                 <ListItemText primary={"Help"} />
-               </ListItemButton>
-             </ListItem>
-           </List>
-         </Box>
-
-            <Box>
-                                              <ListItem key={4} disablePadding>
-               <ListItemButton onClick={logoutUser}>
-                 <ListItemText primary={"Logout"} />
-               </ListItemButton>
-             </ListItem>
-            </Box>
-
-
+          <Box>
+            <ListItem key={4} disablePadding>
+              <ListItemButton onClick={logoutUser}>
+                <ListItemText primary={"Logout"} />
+              </ListItemButton>
+            </ListItem>
+          </Box>
         </Toolbar>
       </AppBar>
-                    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component="main" sx={{ flexGrow: 1 }}>
         <Toolbar />
-            {content}
+        {content}
       </Box>
     </Box>
   );

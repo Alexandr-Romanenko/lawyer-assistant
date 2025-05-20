@@ -10,7 +10,8 @@ import PasswordField from "../FormFields/PasswordField.jsx";
 import InputField from "../FormFields/InputField.jsx";
 import Box from "@mui/joy/Box";
 import "./RegistrationPage.css";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom'
 
 const schema = yup.object({
   email: yup
@@ -51,7 +52,8 @@ const schema = yup.object({
 });
 
 const RegistrationPage = () => {
-  const {
+    const navigate = useNavigate()
+    const {
     control,
     handleSubmit,
     reset,
@@ -73,45 +75,48 @@ const RegistrationPage = () => {
   const [successMsg, setSuccessMsg] = useState("");
 
   const onSubmit = (data) => {
-    setLoading(true);
-    setError(null);
-    setSuccessMsg("");
+  setLoading(true);
+  setError(null);
+  setSuccessMsg("");
 
-    AxiosInstance.post(`user/register/`, {
-      email: data.email,
-      first_name: data.firstName,
-      second_name: data.secondName,
-      password: data.password,
-      password2: data.password2,
+  AxiosInstance.post(`user/register/`, {
+    email: data.email,
+    first_name: data.firstName,
+    second_name: data.secondName,
+    password: data.password,
+    password2: data.password2,
+  })
+    .then((res) => {
+      setSuccessMsg("Реєстрація пройшла успішно! Перевірте пошту, яку Ви вказали при реєстрації.");
+      reset();
+
+    // 5 seconds delay before transition
+    setTimeout(() => {
+      navigate(`/`);
+    }, 5000);
+
     })
-      .then((res) => {
-        console.log("Registration successful:", res.data);
-        setSuccessMsg("Реєстрація пройшла успішно!");
-        reset();
-      })
-      .catch((err) => {
-        console.error("Registration error:", err);
+    .catch((err) => {
+      if (err.response) {
+        const backendErrors = err.response;
 
-        if (err.response) {
-          const backendErrors = err.response;
+        // Get the first error message
+        const firstError = Object.values(backendErrors)?.[0]?.[0];
 
-          // Получаем первое сообщение об ошибке
-          const firstError = Object.values(backendErrors)?.[0]?.[0];
-
-          if (firstError) {
-            setError(firstError); // показываем только одну ошибку
-          } else {
-            setError("Помилка під час реєстрації. Спробуйте ще раз.");
-          }
+        if (firstError) {
+          setError(firstError); // показываем только одну ошибку
         } else {
           setError("Помилка під час реєстрації. Спробуйте ще раз.");
         }
-      })
+      } else {
+        setError("Помилка під час реєстрації. Спробуйте ще раз.");
+      }
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+};
 
-      .finally(() => {
-        setLoading(false);
-      });
-  };
 
   return (
     <section>

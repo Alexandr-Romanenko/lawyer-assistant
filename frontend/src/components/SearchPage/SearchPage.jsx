@@ -7,32 +7,30 @@ import AxiosInstance from "../Axios/Axios.jsx";
 import Textarea from "@mui/joy/Textarea";
 import Box from "@mui/joy/Box";
 import { Button, CircularProgress, Alert } from "@mui/material";
-import { Container } from "@mui/joy";
 import Typography from "@mui/material/Typography";
-
 
 const SearchPage = () => {
   const [search, setSearch] = useState("");
-  const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false); // состояние загрузки
-  const [error, setError] = useState(null); // состояние ошибки
-
   const [method, setMethod] = useState("similarity_search");
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Handel search request
   const handleSearch = (event) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    setResult(""); // очищаем старый результат
+    setResult("");
     if (!search.trim()) {
       setError("Введіть текст пошуку.");
+      setLoading(false);
       return;
     }
 
     AxiosInstance.post(
       `api/search/`,
-      { search },
+      { search, method },
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -40,16 +38,22 @@ const SearchPage = () => {
       }
     )
       .then((res) => {
-        console.log("The analysis was successful:", res.data);
         setResult(res.data.search_result);
       })
       .catch((err) => {
-        console.error("Errors as a result of analysing the decision:", err);
-        setError("Помилка під час аналізу. Спробуйте ще раз.");
+        const message = err.response?.data?.error || "Щось пішло не так";
+        setError(message);
       })
       .finally(() => {
-        setLoading(false); // отключаем индикатор загрузки
+        setLoading(false);
       });
+  };
+
+  // Handel clean field
+  const handleCleanField = () => {
+    setSearch("");
+    setError(null);
+    setResult(""); // To think it is necessary here
   };
 
   return (
@@ -57,20 +61,46 @@ const SearchPage = () => {
       <div className="container">
         <div className="search-page-container">
           <div className="hero-section">
-            <h1 className="hero-title">Court decision analyzer</h1>
+            <h1 className="hero-title">Search assistant</h1>
           </div>
           <div className="use-rules-section">
             <h3>Використання додатку:</h3>
-            <p>
-              В полі "Search" потрібно описати ситуацію, тотожність якої
-              Ви шукаєте або вказати ключові слова для пошуку
-            </p>
+            <div className="use-rules-description">
+              <p>
+                В полі "Search" потрібно описати ситуацію, тотожність якої Ви
+                шукаєте або вказати ключові слова для пошуку
+              </p>
+              <p>Доступні наступні методи пошуку:</p>
+              <div className="use-rules-items">
+                <p>
+                  1. Пошук за схожістю (за замовчуванням) - здійснює пошук за
+                  ключовими словами{" "}
+                </p>
+                <p>
+                  2. Пошук за вектором без оцінки релевантності - шукає за
+                  змістом, не надаючи оцінку подібності
+                </p>
+                <p>
+                  3. Пошук за вектором з оцінкою релевантності - шукає за
+                  змістом та надає оцінку подібності
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Form to search decisions */}
           <div className="form-block">
             <form onSubmit={handleSearch}>
-              <div className="create-quiz-form">
+              <div className="search-form-block">
+                {/* Choose type of search*/}
+                <Box maxWidth="sm" sx={{ mt: 4 }}>
+                  <Typography variant="h5" gutterBottom>
+                    Пошук рішень
+                  </Typography>
+                  <SearchMethodSelector value={method} onChange={setMethod} />
+                </Box>
+
+                {/* Search field */}
                 <div className="form-items">
                   <Box
                     sx={{
@@ -93,35 +123,32 @@ const SearchPage = () => {
                     </div>
                   </Box>
                 </div>
+
+                {/* Search button */}
                 <Button
                   variant="contained"
                   type="submit"
-                  sx={{ width: "10%" }}
-                  disabled={loading}
+                  sx={{ width: "10%", marginTop: "30px", marginRight: "30px" }}
+                  disabled={loading || !search.trim()}
                 >
                   {loading ? "Searching..." : "Search"}
                 </Button>
-              </div>
 
-              {/* Choose type of search*/}
-              <Container maxWidth="sm" sx={{ mt: 4 }}>
-                <Typography variant="h6" gutterBottom>
-                  Пошук рішень
-                </Typography>
-                <SearchMethodSelector value={method} onChange={setMethod} />
+                {/* Clean field button */}
                 <Button
                   variant="contained"
-                  color="primary"
-                  onClick={handleSearch}
-                  sx={{ mt: 2 }}
+                  type="button"
+                  sx={{ width: "10%", marginTop: "30px" }}
+                  onClick={handleCleanField}
+                  disabled={!search.trim()}
                 >
-                  Знайти
+                  Clean
                 </Button>
-              </Container>
+              </div>
             </form>
           </div>
 
-          {/* Лоадер */}
+          {/* Loader */}
           {loading && (
             <div style={{ marginTop: "20px" }}>
               <CircularProgress />
@@ -129,14 +156,14 @@ const SearchPage = () => {
             </div>
           )}
 
-          {/* Ошибка */}
+          {/* Error */}
           {error && (
             <div style={{ marginTop: "20px" }}>
               <Alert severity="error">{error}</Alert>
             </div>
           )}
 
-          {/* Результат */}
+          {/* Result */}
           {result && Array.isArray(result) && result.length > 0 && !loading && (
             <div className="result-block" style={{ marginTop: "20px" }}>
               <h3>Результат пошуку:</h3>

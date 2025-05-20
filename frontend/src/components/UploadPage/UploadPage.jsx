@@ -1,21 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import ProgressBar from "../ProgressBar/ProgressBar.jsx";
+import "./UploadPage.css";
 
 import AxiosInstance from "../Axios/Axios.jsx";
 import Textarea from "@mui/joy/Textarea";
 import Box from "@mui/joy/Box";
-import { Button, CircularProgress, Alert } from "@mui/material";
+import { Button, Alert } from "@mui/material";
 
 const UploadPage = () => {
-
   const [input_text, setInputText] = useState("");
   const [uploadingResult, setUploadingResult] = useState("");
-  const [loading, setLoading] = useState(false); // состояние загрузки
-  const [error, setError] = useState(null); // состояние ошибки
+  const [loading, setLoading] = useState(false); // loading state
+  const [error, setError] = useState(null); // error state
   const [messages, setMessages] = useState([]);
 
-  const socketRef = useRef(null); // сохраняем сокет
+  const socketRef = useRef(null); // save socket
 
   // web-socket
   useEffect(() => {
@@ -24,35 +24,43 @@ const UploadPage = () => {
     socketRef.current = ws;
 
     ws.onopen = () => {
-      console.log("WebSocket connected");
+      setMessages((prev) => [
+        ...prev,
+        { type: "system", detail: "WebSocket connected" },
+      ]);
     };
 
     ws.onmessage = (event) => {
-  try {
-    const data = JSON.parse(event.data);
-    console.log("WebSocket message:", data);
+      try {
+        const data = JSON.parse(event.data);
 
-    // Разделяем по типу сообщения
-    if (data.type === "progress") {
-      // Можно передать в прогрессбар через setProgress(data)
-      // или просто тоже пушить в messages
-      setMessages((prev) => [...prev, data]);
-    } else if (data.type === "status") {
-      setMessages((prev) => [...prev, data]);
-    } else {
-      setMessages((prev) => [...prev, data]); // общий случай
-    }
-  } catch (err) {
-    console.error("Failed to parse WebSocket message", err);
-  }
-};
+        if (data.type === "progress") {
+          setMessages((prev) => [...prev, data]);
+        } else if (data.type === "status") {
+          setMessages((prev) => [...prev, data]);
+        } else {
+          setMessages((prev) => [...prev, data]);
+        }
+      } catch (err) {
+        console.error("Failed to parse WebSocket message", err);
+      }
+    };
 
     ws.onerror = (err) => {
-      console.error("WebSocket error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "error",
+          detail: `WebSocket error: ${err?.message || "Unknown error"}`,
+        },
+      ]);
     };
 
     ws.onclose = () => {
-      console.log("WebSocket closed");
+      setMessages((prev) => [
+        ...prev,
+        { type: "system", detail: "WebSocket closed" },
+      ]);
     };
 
     return () => {
@@ -67,9 +75,10 @@ const UploadPage = () => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    setUploadingResult(""); // очищаем старый результат
+    setUploadingResult(""); // clearing old result
     if (!input_text.trim()) {
       setError("Введіть текст рішення перед завантаженням.");
+      setLoading(false);
       return;
     }
 
@@ -83,16 +92,20 @@ const UploadPage = () => {
       }
     )
       .then((res) => {
-        console.log("The analysis was successful:", res.data);
         setUploadingResult(res.data);
       })
       .catch((err) => {
-        console.error("Errors as a result of analysing the decision:", err);
-        setError("Помилка під час аналізу. Спробуйте ще раз.");
+        setError(err);
       })
       .finally(() => {
-        setLoading(false); // отключаем индикатор загрузки
+        setLoading(false); // disable loading indicator
       });
+  };
+
+  // Handel clean area
+  const handleCleanArea = () => {
+    setInputText("");
+    setError(null);
   };
 
   return (
@@ -105,18 +118,19 @@ const UploadPage = () => {
           <div className="use-rules-section">
             <h3>Завантаження інформації:</h3>
             <p>
-              В поле "Input text" потрібно вставити рішення, які потрібно завантажити до векторної БД
+              В поле "Input text" потрібно вставити рішення, які потрібно
+              завантажити до векторної БД
             </p>
           </div>
 
           {/* Form to upload decisions */}
-          <div className="form-block">
+          <div className="upload-form-block">
             <form onSubmit={handleLoading}>
-              <div className="create-quiz-form">
+              <div className="upload-form">
                 <div className="form-items">
                   <Box
                     sx={{
-                      py: 2,
+                      py: 5,
                       display: "grid",
                       gap: 2,
                       alignItems: "center",
@@ -130,38 +144,56 @@ const UploadPage = () => {
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Input text"
                         variant="soft"
-                        maxRows={1}
+                        maxRows={3}
                       />
                     </div>
                   </Box>
                 </div>
+
+                {/* Upload button */}
                 <Button
                   variant="contained"
                   type="submit"
-                  sx={{ width: "10%" }}
-                  disabled={loading}
+                  sx={{ width: "10%", marginTop: "30px", marginRight: "30px" }}
+                  disabled={loading || !input_text.trim()}
                 >
                   {loading ? "Uploading..." : "Upload"}
+                </Button>
+
+                {/* Clean area button */}
+                <Button
+                  variant="contained"
+                  type="button"
+                  sx={{ width: "10%", marginTop: "30px" }}
+                  onClick={handleCleanArea}
+                  disabled={!input_text.trim()}
+                >
+                  Clean
                 </Button>
               </div>
             </form>
           </div>
 
           {/* Progress Bar */}
-          {uploadingResult && uploadingResult.ids_array && uploadingResult.user_channel_id && (
-  <ProgressBar
-  taskIds={uploadingResult.ids_array}
-  userChannelId={uploadingResult.user_channel_id}
-  socket={socketRef.current}
-  messages={messages}
-/>
-)}
+          {uploadingResult &&
+            uploadingResult.ids_array &&
+            uploadingResult.user_channel_id && (
+              <ProgressBar
+                taskIds={uploadingResult.ids_array}
+                userChannelId={uploadingResult.user_channel_id}
+                socket={socketRef.current}
+                messages={messages}
+              />
+            )}
 
           {/* WebSocket messages area */}
+          <h5 className="header-websocket-area">
+            Деталізація системного процесу
+          </h5>
           <div
             style={{
               marginTop: "20px",
-              maxHeight: "300px",
+              maxHeight: "238px",
               overflowY: "auto",
               border: "1px solid #ddd",
               borderRadius: "8px",
@@ -172,29 +204,28 @@ const UploadPage = () => {
             {messages.slice(-15).map((msg, index) => (
               <Alert
                 key={index}
-                severity="info"
+                severity={
+                  msg.type === "error"
+                    ? "error"
+                    : msg.type === "system"
+                    ? "info"
+                    : "info"
+                }
                 style={{ marginBottom: "5px", fontSize: "0.85rem" }}
               >
-                [ID: {msg.decision_id}] → {msg.status}: {msg.detail}
+                {msg.type === "progress" || msg.type === "status"
+                  ? `[ID: ${msg.decision_id}] → ${msg.status}: ${msg.detail}`
+                  : msg.detail}
               </Alert>
             ))}
           </div>
 
-          {/* Лоадер */}
-          {loading && (
-            <div style={{ marginTop: "20px" }}>
-              <CircularProgress />
-              <p>Завантаження триває... Зачекайте, будь ласка.</p>
-            </div>
-          )}
-
-          {/* Ошибка */}
+          {/* Error */}
           {error && (
             <div style={{ marginTop: "20px" }}>
               <Alert severity="error">{error}</Alert>
             </div>
           )}
-
         </div>
       </div>
     </section>
