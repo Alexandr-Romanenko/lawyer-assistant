@@ -99,10 +99,32 @@ def get_email_template_user_verification(user_id: int, verification_code: str):
     email['To'] = user.email
 
     email.set_content(
-        '<div>'
-        f'<h1 style="color: red;">Hello, {user.first_name} {user.second_name}, please use code </h1>'
-        f'http://{AppConfig.DOMAIN_NAME}/user/verify/{verification_code}'
-        '</div>',
+        f"""
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; padding: 20px;">
+            <h2 style="color: #2c3e50;">Hello, {user.first_name} {user.second_name}!</h2>
+            <p>Thank you for registering. To confirm your account, please click on the link below:</p>
+
+            <a href="http://{AppConfig.DOMAIN_NAME}/user/verify/{verification_code}"
+               style="
+                   display: inline-block;
+                   padding: 10px 20px;
+                   margin-top: 10px;
+                   background-color: #3498db;
+                   color: white;
+                   text-decoration: none;
+                   border-radius: 5px;
+                   font-weight: bold;
+               ">
+               Confirm email
+            </a>
+
+            <p style="margin-top: 20px; color: #7f8c8d;">
+                If you have not registered on website, simply ignore this email.
+            </p>
+
+            <p style="margin-top: 30px;">Sincerely,<br>Teem {AppConfig.PROJECT_NAME}</p>
+        </div>
+        """,
         subtype='html'
     )
     return email

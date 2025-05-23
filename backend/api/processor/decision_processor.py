@@ -15,7 +15,7 @@ class DecisionProcessor:
     def process_all(self, user_channel_id: str) -> list[str]:
         tasks = []
         for decision_id in self.decision_ids:
-            url = ""
+            url = f""
             self.urls.append(url)
             decision_processing_task.delay(url, decision_id, user_channel_id)
             tasks.append(decision_id)
